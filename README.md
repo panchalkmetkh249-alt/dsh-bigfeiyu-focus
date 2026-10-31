@@ -51,7 +51,7 @@ dsh plugin --profile web add github:panchalkmetkh249-alt/dsh-bigfeiyu-focus
 dsh plugin --profile web add link:D:\你的路径\dsh-bigfeiyu-focus
 ```
 
-装完 **重启宿主 / 完全退出桌面客户端再打开**，然后 `Ctrl+F5` 硬刷新页面。浏览器半边的代码是随页面加载的，只刷新不够时再重开一次。
+装完通常会自动刷新一次页面（插件管理那边会弹刷新提示）；没反应就 `Ctrl+F5` 硬刷新，还不行再重启宿主 / 完全退出桌面客户端重开。浏览器半边的代码随页面加载，只重启宿主不刷新页面是不会生效的。
 
 ## 卸载
 
