@@ -1,0 +1,109 @@
+# 大肥鱼视线跟随 · dsh-bigfeiyu-focus
+
+给 DSH 桌宠 [dsh-pet](https://github.com/PC2005-cloud/dsh-pet)（那条吃白饭的蓝色大肥鱼）加一层**视线跟随**：鼠标在哪边，鱼头就朝哪边转过去；鼠标歇着的时候，它自己慢慢东张西望。
+
+> 这是一个**独立插件**：不 fork、不修改 dsh-pet 的任何文件。装上它，桌宠本体还是原来那个；卸掉它，桌宠一点变化都没有。
+
+## 效果
+
+| 你的操作 | 鱼的反应 |
+|---|---|
+| 鼠标移到鱼的左边 / 右边 | 整条鱼绕 Y 轴转过去（带透视，不是平面翻转） |
+| 鼠标在鱼的上方 / 下方 | 抬头 / 低头，并朝光标方向轻微位移 |
+| 鼠标静止 2.8 秒以上 | 进入「东张西望」：缓慢、不同步地左右看 |
+| 拖动鱼 | 姿态立刻回正，松手后重新开始跟随 |
+| 系统开启「减少动态效果」 | 自动关闭全部旋转，保持静止 |
+
+跟随是**带阻尼**的：不是硬贴光标，而是每帧朝目标角度追一段，停下时有一点回弹的松弛感。
+
+## 为什么是「整条鱼转」而不是「眼珠单独动」
+
+dsh-pet 的角色素材是烘焙好的 webm 视频（`assets/webm/*.webm`），眼睛画在像素里，没有独立瞳孔图层可以单独位移。在不改它素材的前提下，能做到的最接近「看镜头」的效果就是**真实的 3D 朝向变化**：`perspective` + `rotateY` / `rotateX` 让整颗头朝光标转过去，再叠一点朝光标的位移制造视差。
+
+如果你要的是瞳孔单独移动的 Live2D 式效果，那需要 dsh-pet 提供眼睛锚点或分层素材，属于另一件事，不在本插件范围内。
+
+## 依赖
+
+- **dsh-pet**（必需）：没有装桌宠时，本插件不报错，只是什么都不会发生。
+- DSH 的 **Web 界面**：网页版 `dsh web` 和官方桌面客户端的网页半区都能用（它的浏览器半边跑在页面里）。
+
+## 安装
+
+### 官方桌面客户端（desktop profile）
+
+桌面端不要用 `dsh plugin --profile web`。在会话里让 DSH 用内置的 `plugin_manager` 装：
+
+> 请用 plugin_manager 安装本地目录 `<本仓库绝对路径>`，装完告诉我结果以及是否需要重启。
+
+或者直接从 GitHub 装：
+
+> 请用 plugin_manager 安装 `github:panchalkmetkh249-alt/dsh-bigfeiyu-focus`。
+
+### Web（`dsh web`，web profile）
+
+```powershell
+dsh plugin --profile web add github:panchalkmetkh249-alt/dsh-bigfeiyu-focus
+```
+
+本地目录安装（改代码即时生效）：
+
+```powershell
+dsh plugin --profile web add link:D:\你的路径\dsh-bigfeiyu-focus
+```
+
+装完 **重启宿主 / 完全退出桌面客户端再打开**，然后 `Ctrl+F5` 硬刷新页面。浏览器半边的代码是随页面加载的，只刷新不够时再重开一次。
+
+## 卸载
+
+```powershell
+dsh plugin --profile web remove dsh-bigfeiyu-focus
+```
+
+桌面端在插件管理里停用或移除本 bundle。卸载后不会在桌宠上留下任何残留（插件只往页面里追加过一条自己的 stylesheet，卸载时连它一起移除）。
+
+## 原理
+
+- 宿主半边（`index.js`）是空实现，只负责让 bundle 行进配置树、把 `client.js` 注入页面。
+- 浏览器半边注册一个 `shell.overlay` 上的**零尺寸桥接组件**，挂载时启动全局引擎，卸载时完整回收。
+- 引擎不碰 dsh-pet 的 inline style：它只往 `<head>` 追加一条自己的样式，并给每个 `.dsh-pet-root` 写 4 个 CSS 自定义属性：
+
+```css
+.dsh-pet-root {
+  transform: perspective(880px)
+    rotateX(var(--bfy-rx, 0deg))
+    rotateY(var(--bfy-ry, 0deg))
+    translate3d(var(--bfy-tx, 0px), var(--bfy-ty, 0px), 0);
+  transform-origin: 50% 62%;
+  will-change: transform;
+}
+```
+
+为什么挂在根节点而不是视频上：dsh-pet 自己会每帧用 `el.style.transform` 给视频写 `scaleX(-1)`（镜像）和 `scaleY(...)`（按压 Q 弹），往视频上叠变换会和它打架；根节点上没有 transform，互不干扰。
+
+- 每帧只做一次 `getBoundingClientRect()` + 写 CSS 变量，不触发布局；`document.hidden` 时自动停算。
+
+## 兼容性
+
+- 认的是 dsh-pet 的稳定类名：`.dsh-pet-root`、`.dsh-pet-hit.dragging`。
+- dsh-pet 大版本若改了 DOM 结构，跟随会**静默失效**（不会报错，也不会影响桌宠本身）。
+- 参数（最大偏航 9°、俯仰 6°、位移 4px、阻尼 0.16、闲置 2.8s）都写在 `client.js` 顶部常量里，想更含蓄或更夸张直接改。
+
+## 开发
+
+没有构建步骤，纯 ESM + 一段浏览器脚本：
+
+```
+dsh-bigfeiyu-focus/
+├── package.json        # bundle 清单 + dsh.client（platform: web, immediately）
+├── cordis.patch.yml    # 挂载一行
+├── index.js            # 宿主半边（空实现）
+├── client.js           # 浏览器半边：样式 + 引擎 + shell.overlay 桥接
+├── icon.svg            # 插件管理页图标
+└── locale/{zh,en}.json # 标题 / 描述
+```
+
+改 `client.js` 后硬刷新页面即可（宿主不需要重启）；改 `package.json` / patch 需要重装或重启。
+
+## License
+
+MIT

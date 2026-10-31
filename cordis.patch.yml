@@ -1,0 +1,5 @@
+# dsh-bigfeiyu-focus 的 bundle 挂载声明。
+# 只插一行：宿主半边是空实现，全部行为在浏览器半边（client.js）。
+- insert:
+    - id: dsh-bigfeiyu-focus
+      name: 'dsh-bigfeiyu-focus'

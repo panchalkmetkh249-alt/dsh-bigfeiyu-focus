@@ -1,0 +1,51 @@
+{
+  "name": "dsh-bigfeiyu-focus",
+  "version": "0.1.0",
+  "description": "让 DSH 桌宠「大肥鱼」的视线跟随鼠标：整条鱼朝光标方向做带透视的 3D 转头与视差位移。",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "cordis",
+    "desktop-pet",
+    "dsh-pet",
+    "gaze",
+    "mouse-follow"
+  ],
+  "homepage": "https://github.com/panchalkmetkh249-alt/dsh-bigfeiyu-focus#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/panchalkmetkh249-alt/dsh-bigfeiyu-focus.git"
+  },
+  "bugs": {
+    "url": "https://github.com/panchalkmetkh249-alt/dsh-bigfeiyu-focus/issues"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Big-Fish Gaze Follow",
+    "description": "Turns the dsh-pet big fish toward your mouse pointer with a perspective head-turn and parallax shift, and lets it look around slowly when the pointer rests. Does not modify any dsh-pet file."
+  }
+}
