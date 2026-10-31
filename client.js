@@ -96,6 +96,10 @@ window.__ModuleLoader__.load({
       let raf = 0;
       let disposed = false;
       let last = 0;
+      /** 第一次跑帧的时间：用来给「找不到网页里的宠物」一个宽限期。 */
+      let startedAt = 0;
+      /** 是否见过至少一只网页宠物（见过就不再提示）。 */
+      let noticed = false;
 
       function onPointerMove(event) {
         pointer.x = event.clientX;
@@ -139,8 +143,20 @@ window.__ModuleLoader__.load({
         const pets = doc.querySelectorAll(PET_SELECTOR);
         if (pets.length === 0) {
           last = 0;
+          if (startedAt === 0) startedAt = now;
+          // 页面上一直没有宠物：最常见的原因是 dsh-pet 的「显示位置」设成了仅桌面
+          // （那是一只独立的 Electron 窗口，网页这边根本拿不到它）。给它一次提示，
+          // 不然用户只会觉得「装了没反应」。
+          if (!noticed && now - startedAt > 6000) {
+            noticed = true;
+            console.info(
+              '[dsh-bigfeiyu-focus] 页面里没有找到大肥鱼。若它的「显示位置」是「仅桌面」，' +
+                '右键大肥鱼 → 显示位置 → 「仅浏览器」或「两者都显示」，视线跟随才会生效。',
+            );
+          }
           return;
         }
+        noticed = true;
 
         const dt = last === 0 ? 16.67 : clamp(now - last, 0, 64);
         last = now;

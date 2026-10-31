@@ -1,6 +1,6 @@
 {
   "name": "dsh-bigfeiyu-focus",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "让 DSH 桌宠「大肥鱼」的视线跟随鼠标：整条鱼朝光标方向做带透视的 3D 转头与视差位移。",
   "type": "module",
   "license": "MIT",
